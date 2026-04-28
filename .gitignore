@@ -1,0 +1,28 @@
+# Byte-compiled / cache do Python
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+# Ambiente virtual
+
+venv/
+.env/
+
+# Arquivos de sistema (Linux/Mac/Windows)
+
+.DS_Store
+Thumbs.db
+
+# IDEs
+
+.vscode/
+.idea/
+
+# Logs
+
+*.log
+
+# Pedidos do professor
+
+gdd.md

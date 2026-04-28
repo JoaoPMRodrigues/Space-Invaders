@@ -13,48 +13,44 @@ def space_invaders():
     y = 800
     janela = Window(x, y)
 
-    distancia = -2
-    jogar = criar_botao("sprites/menu/jogar.png", janela, distancia)
+    # Menu
+    jogar = Botao("sprites/menu/jogar.png", janela, -2)
+    dificuldade = Botao("sprites/menu/dificuldade.png", janela, -0.5)
+    rank = Botao("sprites/menu/rank.png", janela, 1)
+    sair = Botao("sprites/menu/sair.png", janela, 2.5)
 
-    distancia = -0.5
-    dificuldade = criar_botao(
-        "sprites/menu/dificuldade.png", janela, distancia)
-
-    distancia = 1
-    rank = criar_botao("sprites/menu/rank.png", janela, distancia)
-
-    distancia = 2.5
-    sair = criar_botao("sprites/menu/sair.png", janela, distancia)
-
-    distancia = -1
-    facil = criar_botao("sprites/modo/facil.png", janela, distancia)
-
-    distancia = 0
-    medio = criar_botao("sprites/modo/medio.png", janela, distancia)
-
-    distancia = 1
-    dificil = criar_botao("sprites/modo/dificil.png", janela, distancia)
+    # Dificuldade
+    facil = Botao("sprites/modo/facil.png", janela, -1)
+    medio = Botao("sprites/modo/medio.png", janela, 0)
+    dificil = Botao("sprites/modo/dificil.png", janela, 1)
 
     teclado = Keyboard()
-
     estado = "menu"
+
     while True:
+        janela.set_background_color((0, 0, 0))
+
+        # Menu
         if estado == "menu":
-            janela.set_background_color((0, 0, 0))
             if estado == "menu":
                 jogar.draw()
                 dificuldade.draw()
                 rank.draw()
                 sair.draw()
+            if jogar.clicado(janela):
+                estado = "jogo"
+            elif dificuldade.clicado(janela):
+                estado = "dificuldade"
+            elif dificuldade.clicado(janela):
+                estado = "menu"
+            elif sair.clicado(janela):
+                estado = "sair"
 
-            estado = verificar_clique(
-                janela, jogar, dificuldade, rank, sair, estado)
-
-        if estado == "jogo":
+        elif estado == "jogo":
             if teclado.key_pressed("ESC"):
                 estado = "menu"
 
-        if estado == "dificuldade":
+        elif estado == "dificuldade":
             facil.draw()
             medio.draw()
             dificil.draw()
@@ -62,7 +58,7 @@ def space_invaders():
             if teclado.key_pressed("ESC"):
                 estado = "menu"
 
-        if estado == "sair":
+        elif estado == "sair":
             break
         janela.update()
 

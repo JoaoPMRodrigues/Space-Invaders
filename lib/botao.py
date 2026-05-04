@@ -15,7 +15,7 @@ class Botao:
         mouse = janela.mouse
         return mouse.is_over_object(self.sprite) and mouse.button_pressed(1)
 
-
-def criar_botao(caminho, janela, distancia):
-    botao = Botao(caminho, janela, distancia)
-    return botao
+    def update(self, janela):
+        if self.clicado(janela):
+            return True
+        return False

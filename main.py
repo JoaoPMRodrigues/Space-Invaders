@@ -2,7 +2,7 @@ from pplay.keyboard import *
 from pplay.mouse import *
 from pplay.sprite import *
 from pplay.keyboard import *
-from lib.menu import *
+from lib.botao import *
 from rich.traceback import install
 install()
 
@@ -20,9 +20,9 @@ def space_invaders():
     sair = Botao("sprites/menu/sair.png", janela, 2.5)
 
     # Dificuldade
-    facil = Botao("sprites/modo/facil.png", janela, -1)
+    facil = Botao("sprites/modo/facil.png", janela, -1.5)
     medio = Botao("sprites/modo/medio.png", janela, 0)
-    dificil = Botao("sprites/modo/dificil.png", janela, 1)
+    dificil = Botao("sprites/modo/dificil.png", janela, 1.5)
 
     teclado = Keyboard()
     estado = "menu"
@@ -37,13 +37,13 @@ def space_invaders():
                 dificuldade.draw()
                 rank.draw()
                 sair.draw()
-            if jogar.clicado(janela):
+            if jogar.update(janela):
                 estado = "jogo"
-            elif dificuldade.clicado(janela):
+            elif dificuldade.update(janela):
                 estado = "dificuldade"
-            elif dificuldade.clicado(janela):
+            elif dificuldade.update(janela):
                 estado = "menu"
-            elif sair.clicado(janela):
+            elif sair.update(janela):
                 estado = "sair"
 
         elif estado == "jogo":

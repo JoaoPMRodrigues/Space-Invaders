@@ -1,12 +1,12 @@
-from rich.traceback import install
 from lib.tiro import *
 from lib.player import *
+from lib.botao import *
 from pplay.window import *
 from pplay.keyboard import *
 from pplay.mouse import *
 from pplay.sprite import *
 from time import sleep
-from lib.botao import *
+from rich.traceback import install
 install()
 
 
@@ -32,7 +32,7 @@ def space_invaders():
     dif = 1
 
     # Player
-    velocidade = 4
+    velocidade = 400
     player = Player("sprites/player/nave.png",
                     janela, 240, 650, velocidade/dif)
 
@@ -56,6 +56,8 @@ def space_invaders():
             sair.draw()
             if jogar.update(janela):
                 estado = "jogo"
+                player.sprite.x = 240
+                player.sprite.y = 650
                 tiros.clear()
                 sleep(0.2)
             elif dificuldade.update(janela):
@@ -72,7 +74,7 @@ def space_invaders():
             # Movimento do Player
             player.new_speed(velocidade/dif)
             player.recarga(dif)
-            player.update(janela, teclado, dt*100)
+            player.update(janela, teclado, dt)
 
             # Tiro
             if teclado.key_pressed("SPACE") and player.timer <= 0:

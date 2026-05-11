@@ -8,7 +8,7 @@ class Tiro(Entidade):
         self.velocidade = velocidade
 
     def update(self, dt):
-        self.sprite.y -= self.velocidade * dt * 50
+        self.sprite.y -= self.velocidade * dt
 
     def fora_da_tela(self):
         return self.sprite.y < 0

@@ -7,7 +7,7 @@ class Player(Entidade):
     def __init__(self, caminho, janela, x, y, velocidade):
         super().__init__(caminho, janela, x, y)
         self.velocidade = velocidade
-        valor = 0.5
+        valor = 0.3
         self.cooldown = valor
         self.base = valor
         self.timer = 0
@@ -22,7 +22,7 @@ class Player(Entidade):
         # Movimento
 
         if self.timer > 0:
-            self.timer -= dt/50
+            self.timer -= dt
 
         if teclado.key_pressed("LEFT"):
             self.sprite.x -= self.velocidade*dt

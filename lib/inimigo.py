@@ -63,32 +63,19 @@ class Enxame:
 
                 self.inimigos.append(inimigo)
 
-    # =========================
-    # UPDATE
-    # =========================
-
     def update(self, dt):
 
         self.movimentar(dt)
-
-    # =========================
-    # DRAW
-    # =========================
 
     def draw(self):
 
         for inimigo in self.inimigos:
             inimigo.draw()
 
-    # =========================
-    # MOVIMENTO
-    # =========================
-
     def movimentar(self, dt):
 
         inverter = False
 
-        # Verifica colisão lateral
         for inimigo in self.inimigos:
 
             if inimigo.sprite.x <= 0:
@@ -103,7 +90,6 @@ class Enxame:
                 inverter = True
                 break
 
-        # Inverte TODOS no mesmo frame
         if inverter:
 
             self.direcao *= -1
@@ -112,7 +98,6 @@ class Enxame:
                 inimigo.sprite.y += 30
                 inimigo.sprite.x += self.direcao * self.velocidade * dt
 
-        # Movimento horizontal
         for inimigo in self.inimigos:
 
             inimigo.sprite.x += (
@@ -120,10 +105,6 @@ class Enxame:
                 * self.direcao
                 * dt
             )
-
-    # =========================
-    # GAME OVER
-    # =========================
 
     def chegou_no_player(self, player):
 
@@ -134,13 +115,29 @@ class Enxame:
                 >= player.sprite.y
             )
 
-            colisao_horizontal = (
-                inimigo.sprite.x < player.sprite.x + player.sprite.width
-                and
-                inimigo.sprite.x + inimigo.sprite.width > player.sprite.x
-            )
-
-            if colisao_vertical and colisao_horizontal:
+            if colisao_vertical:
                 return True
 
         return False
+
+    def atualizar_limites(self):
+
+        self.menor_x = min(
+            inimigo.sprite.x
+            for inimigo in self.inimigos
+        )
+
+        self.maior_x = max(
+            inimigo.sprite.x + inimigo.sprite.width
+            for inimigo in self.inimigos
+        )
+
+        self.menor_y = min(
+            inimigo.sprite.y
+            for inimigo in self.inimigos
+        )
+
+        self.maior_y = max(
+            inimigo.sprite.y + inimigo.sprite.height
+            for inimigo in self.inimigos
+        )

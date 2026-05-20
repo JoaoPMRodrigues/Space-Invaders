@@ -11,122 +11,70 @@ from lib.inimigo import *
 class Jogo:
     def __init__(self):
 
-        # Janela
         self.largura = 800
         self.altura = 800
 
         self.janela = Window(self.largura, self.altura)
         self.janela.set_title("--- SPACE INVADERS ---")
 
-        # Fundo
         self.fundo = Sprite("sprites/menu/fundo.png")
 
-        # Input
         self.teclado = Keyboard()
 
-        # Estado do jogo
         self.estado = "menu"
 
-        # Dificuldade
         self.dificuldade = 1
 
-        # Entidades
         self.criar_player()
         self.criar_menu()
         self.criar_dificuldade()
         self.criar_inimigos()
 
-        # Tiros
         self.tiros = []
-
-    # =========================
-    # CRIAÇÃO DE OBJETOS
-    # =========================
 
     def criar_player(self):
         self.velocidade_player = 400
 
         self.player = Player(
-            "sprites/player/nave1.png",
-            self.janela,
-            240,
-            650,
-            self.velocidade_player
-        )
+            "sprites/player/nave.png", self.janela, 240, 650, self.velocidade_player)
 
     def criar_menu(self):
 
         self.jogar = Botao(
-            "sprites/menu/jogar.png",
-            self.janela,
-            220,
-            246
-        )
+            "sprites/menu/jogar.png", self.janela, 220, 246)
 
         self.dificuldade_botao = Botao(
-            "sprites/menu/dificuldade.png",
-            self.janela,
-            220,
-            358.5
-        )
+            "sprites/menu/dificuldade.png", self.janela, 220, 358.5)
 
         self.rank = Botao(
-            "sprites/menu/rank.png",
-            self.janela,
-            220,
-            474
-        )
+            "sprites/menu/rank.png", self.janela, 220, 474)
 
         self.sair = Botao(
-            "sprites/menu/sair.png",
-            self.janela,
-            220,
-            597.5
-        )
+            "sprites/menu/sair.png", self.janela, 220, 597.5)
 
     def criar_dificuldade(self):
 
         self.facil = Botao(
-            "sprites/modo/facil.png",
-            self.janela,
-            325,
-            310
-        )
+            "sprites/modo/facil.png", self.janela, 325, 310)
 
         self.medio = Botao(
-            "sprites/modo/medio.png",
-            self.janela,
-            325,
-            400
-        )
+            "sprites/modo/medio.png", self.janela, 325, 400)
 
         self.dificil = Botao(
-            "sprites/modo/dificil.png",
-            self.janela,
-            325,
-            487
-        )
+            "sprites/modo/dificil.png", self.janela, 325, 487)
 
     def criar_inimigos(self):
 
         self.enxame = Enxame(
-            "sprites/player/monstro.png",
-            self.janela,
-            linhas=4,
-            colunas=7,
-            velocidade=120
-        )
-
-    # =========================
-    # LOOP PRINCIPAL
-    # =========================
+            "sprites/player/monstro.png", self.janela, linhas=4, colunas=7, velocidade=120)
 
     def run(self):
+        self.cooldown = 0.2
+        self.fps = 0
 
         while True:
 
             self.dt = self.janela.delta_time()
-
             self.desenhar_fundo()
 
             if self.estado == "menu":
@@ -142,10 +90,6 @@ class Jogo:
                 break
 
             self.janela.update()
-
-    # =========================
-    # MENU
-    # =========================
 
     def update_menu(self):
 
@@ -167,14 +111,9 @@ class Jogo:
             self.estado = "sair"
             sleep(0.2)
 
-    # =========================
-    # GAMEPLAY
-    # =========================
-
     def update_gameplay(self):
 
         self.mostrar_fps()
-
         self.player.recarga(self.dificuldade)
         self.player.new_speed(
             self.velocidade_player / self.dificuldade
@@ -191,8 +130,9 @@ class Jogo:
         self.verificar_colisoes()
 
         if len(self.enxame.inimigos) == 0:
-            tiros_remover = []
-            self.criar_inimigos()
+
+            self.tiros = []
+            self.estado = "menu"
 
         if self.enxame.chegou_no_player(self.player):
             self.estado = "menu"
@@ -211,27 +151,11 @@ class Jogo:
 
         self.enxame.draw()
 
-    # =========================
-    # TIROS
-    # =========================
-
     def update_tiros(self):
 
-        if (
-            self.teclado.key_pressed("SPACE")
-            and self.player.timer <= 0
-        ):
-
+        if (self.teclado.key_pressed("SPACE") and self.player.timer <= 0):
             self.tiros.append(
-                Tiro(
-                    "sprites/player/tiro.png",
-                    self.janela,
-                    self.player.sprite.x
-                    + self.player.sprite.width // 2,
-                    self.player.sprite.y,
-                    600
-                )
-            )
+                Tiro("sprites/player/tiro.png", self.janela, self.player.sprite.x + self.player.sprite.width // 2, self.player.sprite.y, 600))
 
             self.player.timer = self.player.cooldown
 
@@ -243,17 +167,10 @@ class Jogo:
             if not tiro.fora_da_tela()
         ]
 
-    # =========================
-    # INIMIGOS
-    # =========================
-
     def update_inimigos(self):
 
         self.enxame.update(self.dt)
-
-    # =========================
-    # DIFICULDADE
-    # =========================
+        self.enxame.atualizar_limites()
 
     def update_dificuldade(self):
 
@@ -279,31 +196,22 @@ class Jogo:
         if self.teclado.key_pressed("ESC"):
             self.estado = "menu"
 
-    # =========================
-    # UTILITÁRIOS
-    # =========================
-
     def desenhar_fundo(self):
         self.janela.set_background_color((0, 0, 0))
         self.fundo.draw()
 
     def mostrar_fps(self):
 
-        fps = int(1 / self.dt) if self.dt > 0 else 0
-
+        self.cooldown -= self.dt
+        if self.cooldown < 0:
+            self.fps = int(1 / self.dt) if self.dt > 0 else 0
+            self.cooldown = 0.2
         self.janela.draw_text(
-            f"FPS: {fps}",
-            10,
-            10,
-            size=20,
-            color=(255, 255, 255)
-        )
+            f"FPS: {self.fps}", 10, 10, size=20, color=(255, 255, 255))
 
     def resetar_jogo(self):
-
         self.player.sprite.x = 240
         self.player.sprite.y = 650
-
         self.player.timer = 0
 
         self.tiros.clear()
@@ -311,25 +219,33 @@ class Jogo:
 
     def verificar_colisoes(self):
 
-        tiros_remover = []
-        inimigos_remover = []
-
+        tiros_remover = set()
+        inimigos_remover = set()
         for tiro in self.tiros:
+
+            enxame = len(self.enxame.inimigos)-1
+            if tiro.sprite.y < self.enxame.menor_y-tiro.sprite.height:
+                continue
+            if tiro.sprite.x < self.enxame.menor_x-tiro.sprite.width:
+                continue
+            if tiro.sprite.y > self.enxame.maior_y:
+                continue
+            if tiro.sprite.x > self.enxame.maior_x:
+                continue
 
             for inimigo in self.enxame.inimigos:
 
                 if tiro.sprite.collided(inimigo.sprite):
 
-                    tiros_remover.append(tiro)
-                    inimigos_remover.append(inimigo)
+                    tiros_remover.add(tiro)
+                    inimigos_remover.add(inimigo)
+                    break
 
-        # Remove tiros
         for tiro in tiros_remover:
 
             if tiro in self.tiros:
                 self.tiros.remove(tiro)
 
-        # Remove inimigos
         for inimigo in inimigos_remover:
 
             if inimigo in self.enxame.inimigos:

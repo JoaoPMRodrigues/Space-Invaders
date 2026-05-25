@@ -1,4 +1,3 @@
-from time import sleep
 from pplay.window import *
 from pplay.keyboard import *
 from pplay.sprite import *
@@ -69,8 +68,7 @@ class Jogo:
             "sprites/player/monstro.png", self.janela, linhas=4, colunas=7, velocidade=120)
 
     def run(self):
-        self.cooldown = 0.2
-        self.fps = 0
+        self.cooldown = self.fps = 0
 
         while True:
 
@@ -101,15 +99,12 @@ class Jogo:
         if self.jogar.update(self.janela):
             self.resetar_jogo()
             self.estado = "jogo"
-            sleep(0.2)
 
         elif self.dificuldade_botao.update(self.janela):
             self.estado = "dificuldade"
-            sleep(0.2)
 
         elif self.sair.update(self.janela):
             self.estado = "sair"
-            sleep(0.2)
 
     def update_gameplay(self):
 
@@ -181,17 +176,14 @@ class Jogo:
         if self.facil.update(self.janela):
             self.dificuldade = 1
             self.estado = "menu"
-            sleep(0.2)
 
         elif self.medio.update(self.janela):
             self.dificuldade = 1.5
             self.estado = "menu"
-            sleep(0.2)
 
         elif self.dificil.update(self.janela):
             self.dificuldade = 2
             self.estado = "menu"
-            sleep(0.2)
 
         if self.teclado.key_pressed("ESC"):
             self.estado = "menu"

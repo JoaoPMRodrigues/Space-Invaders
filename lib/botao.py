@@ -1,21 +1,25 @@
 from pplay.sprite import *
-from pplay.mouse import *
 from lib.entidade import *
 
 
 class Botao(Entidade):
-    def __init__(self, imagem, janela, x, y):
+    def __init__(self, imagem, window, x, y):
+        super().__init__(imagem, window, x, y)
+        self.was_pressed = False
 
-        super().__init__(imagem, janela, x, y)
+    def clicked(self, window):
+        mouse = window.mouse
+        hovering = mouse.is_over_object(self.sprite)
+        pressed = mouse.button_pressed(1)
 
-    def clicado(self, janela):
+        if hovering and pressed and not self.was_pressed:
+            self.was_pressed = True
+            return True
 
-        mouse = janela.mouse
+        if not pressed:
+            self.was_pressed = False
 
-        return (
-            mouse.is_over_object(self.sprite)
-            and mouse.button_pressed(1)
-        )
+        return False
 
-    def update(self, janela):
-        return self.clicado(janela)
+    def update(self, window):
+        return self.clicked(window)

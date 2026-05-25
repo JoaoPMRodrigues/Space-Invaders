@@ -1,7 +1,8 @@
 from pplay.sprite import *
+from abc import ABC
 
 
-class Entidade:
+class Entidade(ABC):
     def __init__(self, caminho, janela, x=0, y=0):
 
         self.sprite = Sprite(caminho)

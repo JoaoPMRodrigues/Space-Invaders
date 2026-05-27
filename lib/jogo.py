@@ -5,6 +5,7 @@ from lib.player import *
 from lib.tiro import *
 from lib.botao import *
 from lib.inimigo import *
+from random import uniform, choice, randint
 
 
 class Jogo:
@@ -15,11 +16,8 @@ class Jogo:
 
         self.janela = Window(self.largura, self.altura)
         self.janela.set_title("--- SPACE INVADERS ---")
-
         self.fundo = Sprite("sprites/menu/fundo.png")
-
         self.teclado = Keyboard()
-
         self.estado = "menu"
 
         self.dificuldade = 1
@@ -30,6 +28,9 @@ class Jogo:
         self.criar_inimigos()
 
         self.tiros = []
+        self.tiros_inimigos = []
+        self.cooldown_inimigo = 1
+        self.timer_inimigo = self.cooldown_inimigo
 
     def criar_player(self):
         self.velocidade_player = 400
@@ -85,6 +86,7 @@ class Jogo:
                 self.update_dificuldade()
 
             elif self.estado == "sair":
+                self.resetar_jogo()
                 break
 
             self.janela.update()
@@ -122,8 +124,11 @@ class Jogo:
 
         self.update_tiros()
         self.update_inimigos()
-        self.verificar_colisoes()
+        self.update_tiros_inimigos()
 
+        self.verificar_colisoes()
+        self.verificar_colisoes_player()
+        self.verificar_colisoes_tiros()
         if len(self.enxame.inimigos) == 0:
 
             self.tiros = []
@@ -144,6 +149,20 @@ class Jogo:
         for tiro in self.tiros:
             tiro.draw()
 
+        for tiro in self.tiros_inimigos:
+            tiro.draw()
+
+        mensagem = ""
+        for _ in range(self.player.vidas):
+            mensagem += "❤️"
+        for _ in range(3-self.player.vidas):
+            mensagem += "💔"
+        self.janela.draw_text(mensagem,
+                              10,
+                              40,
+                              size=20,
+                              color=(255, 255, 255)
+                              )
         self.enxame.draw()
 
     def update_tiros(self):
@@ -166,6 +185,42 @@ class Jogo:
 
         self.enxame.update(self.dt)
         self.enxame.atualizar_limites()
+
+    def update_tiros_inimigos(self):
+
+        self.timer_inimigo -= self.dt
+
+        if (
+            self.timer_inimigo <= 0
+            and len(self.enxame.inimigos) > 0
+        ):
+
+            atirador = choice(self.enxame.inimigos)
+
+            self.tiros_inimigos.append(
+                Tiro(
+                    "sprites/player/tiro_inimigo.png",
+                    self.janela,
+                    atirador.sprite.x +
+                    atirador.sprite.width // 2,
+                    atirador.sprite.y +
+                    atirador.sprite.height,
+                    -300
+                )
+            )
+
+            self.timer_inimigo = (
+                self.cooldown_inimigo *
+                uniform(0.8, 1.2)
+            )
+
+        for tiro in self.tiros_inimigos:
+            tiro.sprite.y += 300 * self.dt
+
+        self.tiros_inimigos = [
+            tiro for tiro in self.tiros_inimigos
+            if tiro.sprite.y < self.altura
+        ]
 
     def update_dificuldade(self):
 
@@ -207,15 +262,24 @@ class Jogo:
         self.player.timer = 0
 
         self.tiros.clear()
+        self.tiros_inimigos.clear()
         self.criar_inimigos()
+        self.player.vidas = 3
+        self.player.invencivel = False
+
+    def verificar_colisoes_tiros(self):
+        for tiro in self.tiros:
+            for tiro_inimigos in self.tiros_inimigos:
+                if tiro.sprite.collided(tiro_inimigos.sprite):
+                    self.tiros.remove(tiro)
+                    self.tiros_inimigos.remove(tiro_inimigos)
+                    break
 
     def verificar_colisoes(self):
 
         tiros_remover = set()
         inimigos_remover = set()
         for tiro in self.tiros:
-
-            enxame = len(self.enxame.inimigos)-1
             if tiro.sprite.y < self.enxame.menor_y-tiro.sprite.height:
                 continue
             if tiro.sprite.x < self.enxame.menor_x-tiro.sprite.width:
@@ -242,3 +306,32 @@ class Jogo:
 
             if inimigo in self.enxame.inimigos:
                 self.enxame.inimigos.remove(inimigo)
+
+    def verificar_colisoes_player(self):
+
+        if self.player.invencivel:
+            return
+
+        tiros_remover = []
+
+        for tiro in self.tiros_inimigos:
+
+            if tiro.sprite.collided(self.player.sprite):
+
+                tiros_remover.append(tiro)
+
+                self.player.vidas -= 1
+
+                self.player.respawn()
+
+                break
+
+        for tiro in tiros_remover:
+
+            if tiro in self.tiros_inimigos:
+                self.tiros_inimigos.remove(tiro)
+
+        if self.player.vidas <= 0:
+
+            self.resetar_jogo()
+            self.estado = "menu"

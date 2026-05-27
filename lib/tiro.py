@@ -14,3 +14,12 @@ class Tiro(Entidade):
 
     def fora_da_tela(self):
         return self.sprite.y < 0
+
+
+class TiroInimigo(Tiro):
+
+    def update(self, dt):
+        self.sprite.y += self.velocidade * dt
+
+    def fora_da_tela(self):
+        return self.sprite.y > 1100

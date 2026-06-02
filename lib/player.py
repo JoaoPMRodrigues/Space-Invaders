@@ -34,7 +34,6 @@ class Player(Entidade):
         if teclado.key_pressed("RIGHT") or teclado.key_pressed("D"):
             self.sprite.x += self.velocidade * dt
 
-        # Colisão com parede
         if self.sprite.x < 0:
             self.sprite.x = 0
 

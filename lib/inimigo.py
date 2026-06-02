@@ -28,13 +28,11 @@ class Enxame:
 
         self.inimigos = []
 
-        # Sprite base apenas para medir
         base = Sprite(caminho)
 
         largura = base.width
         altura = base.height
 
-        # Espaçamento = metade do sprite
         espacamento_x = largura // 4
         espacamento_y = altura // 4
 

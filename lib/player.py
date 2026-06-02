@@ -28,10 +28,10 @@ class Player(Entidade):
         if self.timer > 0:
             self.timer -= dt
 
-        if teclado.key_pressed("LEFT"):
+        if teclado.key_pressed("LEFT") or teclado.key_pressed("A"):
             self.sprite.x -= self.velocidade * dt
 
-        if teclado.key_pressed("RIGHT"):
+        if teclado.key_pressed("RIGHT") or teclado.key_pressed("D"):
             self.sprite.x += self.velocidade * dt
 
         # Colisão com parede
@@ -64,7 +64,6 @@ class Player(Entidade):
 
     def draw(self):
         if self.invencivel:
-
             if int(self.timer_invencivel * 10) % 2 == 0:
                 return
 

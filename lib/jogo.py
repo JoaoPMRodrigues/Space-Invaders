@@ -6,6 +6,8 @@ from lib.tiro import *
 from lib.botao import *
 from lib.inimigo import *
 from random import uniform, choice, randint
+from time import perf_counter
+from datetime import datetime
 
 
 class Jogo:
@@ -21,7 +23,7 @@ class Jogo:
         self.estado = "menu"
 
         self.dificuldade = 1
-
+        self.pontuacao = 0
         self.criar_player()
         self.criar_menu()
         self.criar_dificuldade()
@@ -31,6 +33,7 @@ class Jogo:
         self.tiros_inimigos = []
         self.cooldown_inimigo = 1
         self.timer_inimigo = self.cooldown_inimigo
+        self.menor_tempo = float("inf")
 
     def criar_player(self):
         self.velocidade_player = 400
@@ -70,7 +73,7 @@ class Jogo:
 
     def run(self):
         self.cooldown = self.fps = 0
-
+        self.inicio = perf_counter()
         while True:
 
             self.dt = self.janela.delta_time()
@@ -84,6 +87,8 @@ class Jogo:
 
             elif self.estado == "dificuldade":
                 self.update_dificuldade()
+            elif self.estado == "rank":
+                self.update_ranking()
 
             elif self.estado == "sair":
                 self.resetar_jogo()
@@ -104,6 +109,8 @@ class Jogo:
 
         elif self.dificuldade_botao.update(self.janela):
             self.estado = "dificuldade"
+        elif self.rank.update(self.janela):
+            self.estado = "rank"
 
         elif self.sair.update(self.janela):
             self.estado = "sair"
@@ -130,12 +137,12 @@ class Jogo:
         self.verificar_colisoes_player()
         self.verificar_colisoes_tiros()
         if len(self.enxame.inimigos) == 0:
-
-            self.tiros = []
-            self.estado = "menu"
+            self.vitoria()
+            self.resetar_jogo()
 
         if self.enxame.chegou_no_player(self.player):
             self.estado = "menu"
+            self.derrota()
 
         self.draw_gameplay()
 
@@ -243,7 +250,47 @@ class Jogo:
         if self.teclado.key_pressed("ESC"):
             self.estado = "menu"
 
+    def update_ranking(self):
+
+        ranking = self.ler_ranking()
+
+        self.janela.draw_text(
+            "TOP 5",
+            320,
+            100,
+            size=30,
+            color=(255, 255, 255)
+        )
+
+        y = 180
+
+        for posicao, jogador in enumerate(
+            ranking,
+            start=1
+        ):
+
+            texto = (
+                f"{posicao}. "
+                f"{jogador['nome']} | "
+                f"{jogador['pontuacao']} pts | "
+                f"{jogador['data']}"
+            )
+
+            self.janela.draw_text(
+                texto,
+                200,
+                y,
+                size=20,
+                color=(255, 255, 255)
+            )
+
+            y += 40
+
+        if self.teclado.key_pressed("ESC"):
+            self.estado = "menu"
+
     def desenhar_fundo(self):
+
         self.janela.set_background_color((0, 0, 0))
         self.fundo.draw()
 
@@ -260,12 +307,14 @@ class Jogo:
         self.player.sprite.x = 240
         self.player.sprite.y = 650
         self.player.timer = 0
-
+        self.dificuldade = 1
+        self.pontuacao = 0
         self.tiros.clear()
         self.tiros_inimigos.clear()
         self.criar_inimigos()
         self.player.vidas = 3
         self.player.invencivel = False
+        self.inicio = perf_counter()
 
     def verificar_colisoes_tiros(self):
         for tiro in self.tiros:
@@ -295,6 +344,7 @@ class Jogo:
 
                     tiros_remover.add(tiro)
                     inimigos_remover.add(inimigo)
+                    self.pontuacao += 100
                     break
 
         for tiro in tiros_remover:
@@ -335,3 +385,58 @@ class Jogo:
 
             self.resetar_jogo()
             self.estado = "menu"
+            self.derrota()
+
+    def vitoria(self):
+        self.dificuldade += 0.1
+        self.fim = perf_counter()
+        self.time = self.fim - self.inicio
+        if self.time < self.menor_tempo:
+            self.menor_tempo = self.time
+
+    def derrota(self):
+        self.nome = str(input())
+        if self.menor_tempo < float("inf"):
+            self.pontuacao /= self.menor_tempo
+            self.salvar_ranking()
+        self.menor_tempo = float("inf")
+
+    def salvar_ranking(self):
+        data = datetime.now().strftime("%d/%m/%Y")
+
+        with open("dados/rank.txt", "a", encoding="utf-8") as arquivo:
+            arquivo.write(f"{self.nome};{self.pontuacao*100:.0f};{data}\n")
+
+    def ler_ranking(self):
+        try:
+            with open(
+                "dados/rank.txt",
+                "r",
+                encoding="utf-8"
+            ) as arquivo:
+
+                ranking = []
+
+                for linha in arquivo:
+
+                    nome, pontuacao, data = (
+                        linha.strip().split(";")
+                    )
+
+                    ranking.append({
+                        "nome": nome,
+                        "pontuacao": int(pontuacao),
+                        "data": data
+                    })
+
+            ranking.sort(
+                key=lambda jogador:
+                jogador["pontuacao"],
+                reverse=True
+            )
+
+            return ranking[:5]
+
+        except FileNotFoundError:
+
+            return []

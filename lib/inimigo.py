@@ -1,4 +1,5 @@
 from lib.entidade import *
+from random import randint
 
 
 class Inimigo(Entidade):
@@ -8,58 +9,41 @@ class Inimigo(Entidade):
 
 
 class Enxame:
-    def __init__(
-        self,
-        caminho,
-        janela,
-        linhas=3,
-        colunas=5,
-        velocidade=30
-    ):
+    def __init__(self, caminho, janela, linhas=3, colunas=5, velocidade=30):
 
         self.janela = janela
-
         self.linhas = linhas
         self.colunas = colunas
 
-        self.velocidade = velocidade
-
+        self.velocidade = velocidade/2
         self.direcao = 1
-
+        fim = (linhas-1) * (colunas-1)
+        self.boss = randint(0, fim)
         self.inimigos = []
 
         base = Sprite(caminho)
-
         largura = base.width
         altura = base.height
 
-        espacamento_x = largura // 4
-        espacamento_y = altura // 4
+        self.espacamento_x = largura // 4
+        self.espacamento_y = altura // 4
 
         offset_x = 20
         offset_y = 20
-
+        c = 0
         for linha in range(self.linhas):
             for coluna in range(self.colunas):
 
-                x = (
-                    offset_x
-                    + coluna * (largura + espacamento_x)
-                )
+                x = (offset_x + coluna * (largura + self.espacamento_x))
+                y = (offset_y + linha * (altura + self.espacamento_y))
 
-                y = (
-                    offset_y
-                    + linha * (altura + espacamento_y)
-                )
-
-                inimigo = Inimigo(
-                    caminho,
-                    janela,
-                    x,
-                    y
-                )
-
+                if c != self.boss:
+                    inimigo = Inimigo(caminho, janela, x, y)
+                else:
+                    inimigo = Inimigo("sprites/player/boss.png", janela, x, y)
                 self.inimigos.append(inimigo)
+
+                c += 1
 
     def update(self, dt):
 
@@ -139,3 +123,46 @@ class Enxame:
             inimigo.sprite.y + inimigo.sprite.height
             for inimigo in self.inimigos
         )
+
+    def escolhe_boss(self):
+
+        if len(self.inimigos) == 0:
+            self.boss = -1
+            return
+
+        self.boss = randint(0, len(self.inimigos) - 1)
+
+        for i in range(len(self.inimigos)):
+            if i == self.boss:
+                x = self.inimigos[i].sprite.x
+                y = self.inimigos[i].sprite.y
+
+                self.inimigos[i].sprite = Sprite("sprites/player/boss.png")
+
+                self.inimigos[i].sprite.x = x
+                self.inimigos[i].sprite.y = y
+
+    def matar_boss(self, inimigo):
+
+        indice = self.inimigos.index(inimigo)
+        cima = indice-7
+        esquerda = indice - 1
+        direita = indice + 1
+
+        remover = [indice]
+        if cima > 0:
+            remover.append(cima)
+        if esquerda >= 0:
+            remover.append(esquerda)
+
+        if direita < len(self.inimigos):
+            remover.append(direita)
+
+        remover.sort(reverse=True)
+
+        for i in remover:
+            self.inimigos.pop(i)
+
+        self.escolhe_boss()
+
+        return True

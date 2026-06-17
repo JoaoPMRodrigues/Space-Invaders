@@ -197,13 +197,9 @@ class Jogo:
 
         self.timer_inimigo -= self.dt
 
-        if (
-            self.timer_inimigo <= 0
-            and len(self.enxame.inimigos) > 0
-        ):
+        if (self.timer_inimigo <= 0 and len(self.enxame.inimigos) > 0):
 
             atirador = choice(self.enxame.inimigos)
-
             self.tiros_inimigos.append(
                 Tiro(
                     "sprites/player/tiro_inimigo.png",
@@ -276,13 +272,8 @@ class Jogo:
                 f"{jogador['data']}"
             )
 
-            self.janela.draw_text(
-                texto,
-                200,
-                y,
-                size=20,
-                color=(255, 255, 255)
-            )
+            self.janela.draw_text(texto, 200, y, size=20,
+                                  color=(255, 255, 255))
 
             y += 40
 
@@ -328,37 +319,49 @@ class Jogo:
 
         tiros_remover = set()
         inimigos_remover = set()
+
         for tiro in self.tiros:
-            if tiro.sprite.y < self.enxame.menor_y-tiro.sprite.height:
+            if tiro.sprite.y < self.enxame.menor_y - tiro.sprite.height:
                 continue
-            if tiro.sprite.x < self.enxame.menor_x-tiro.sprite.width:
+            if tiro.sprite.x < self.enxame.menor_x - tiro.sprite.width:
                 continue
             if tiro.sprite.y > self.enxame.maior_y:
                 continue
             if tiro.sprite.x > self.enxame.maior_x:
                 continue
-
-            for inimigo in self.enxame.inimigos:
-
+            for indice, inimigo in enumerate(self.enxame.inimigos):
                 if tiro.sprite.collided(inimigo.sprite):
-
                     tiros_remover.add(tiro)
-                    inimigos_remover.add(inimigo)
-                    self.pontuacao += 100
+
+                    if indice == self.enxame.boss:
+                        self.enxame.matar_boss(inimigo)
+                        self.pontuacao += 1000
+
+                    else:
+                        inimigos_remover.add(inimigo)
+                        self.pontuacao += 100
                     break
 
         for tiro in tiros_remover:
-
             if tiro in self.tiros:
                 self.tiros.remove(tiro)
 
         for inimigo in inimigos_remover:
-
             if inimigo in self.enxame.inimigos:
+                indice = self.enxame.inimigos.index(inimigo)
+                if indice < self.enxame.boss:
+                    self.enxame.boss -= 1
                 self.enxame.inimigos.remove(inimigo)
 
-    def verificar_colisoes_player(self):
+            for tiro in tiros_remover:
+                if tiro in self.tiros:
+                    self.tiros.remove(tiro)
 
+            for inimigo in inimigos_remover:
+                if inimigo in self.enxame.inimigos:
+                    self.enxame.inimigos.remove(inimigo)
+
+    def verificar_colisoes_player(self):
         if self.player.invencivel:
             return
 

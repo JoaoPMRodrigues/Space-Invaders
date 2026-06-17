@@ -14,9 +14,22 @@ Este projeto é uma implementação do clássico **Space Invaders**, desenvolvid
   * Dificuldade
   * Ranking
   * Sair
+
 * Navegação entre telas usando mouse
 * Sistema de estados (menu, jogo, dificuldade)
 * Interface gráfica com sprites personalizados
+
+
+
+### Funcionalidades da prova
+
+* Na matriz de monstros vai aparecer 1 monstro sorteado que será o boss
+Ele terá cor diferente dos outros
+
+* Quando matar o boss, todos os vizinhos morrem
+
+* Quando ele morrer um novo monstro será sorteado para virar boss
+
 
 ---
 
